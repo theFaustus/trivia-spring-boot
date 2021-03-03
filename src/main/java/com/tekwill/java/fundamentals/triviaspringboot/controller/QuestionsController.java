@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -28,22 +29,28 @@ public class QuestionsController {
         return ResponseEntity.ok(all);
     }
 
-    @GetMapping(value = "/{level}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/by-level/{level}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Question>> getQuestionsByLevel(@PathVariable Integer level){
         final List<Question> byLevel = questionService.getQuestionsByLevel(level);
         return ResponseEntity.ok(byLevel);
     }
 
-    @DeleteMapping(value = "/delete/{questionId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{questionId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Question> getQuestionById(@PathVariable Long questionId){
+        final Question questionById = questionService.getQuestionById(questionId);
+        return ResponseEntity.ok(questionById);
+    }
+
+    @DeleteMapping(value = "/{questionId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteQuestionById(@PathVariable Long questionId){
         questionService.deleteById(questionId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping( produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> deleteQuestionById(@RequestBody Question question){
+    public ResponseEntity<String> deleteQuestionById(Question question){
         question.getAnswers().forEach(q -> q.setQuestion(question));
-        questionService.save(question);
-        return ResponseEntity.ok("Question created");
+        final Long newQuestionId = questionService.save(question);
+        return ResponseEntity.created(URI.create("/questions/" + newQuestionId)).body("Question created");
     }
 }

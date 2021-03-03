@@ -67,8 +67,43 @@ public class QuestionRepositoryImpl implements QuestionRepository {
     }
 
     @Override
-    public boolean save(Question question) {
+    public Question findQuestionById(Long questionId) {
+        Question q = null;
+        log.debug("Searching questions for id [{}]", questionId);
+        try (Connection c = DriverManager.getConnection(url + database, userName, password);
+             PreparedStatement ps = c.prepareStatement("SELECT * FROM QUESTION Q  WHERE Q.ID = ?");
+             PreparedStatement ps2 = c.prepareStatement("SELECT * FROM ANSWER A  WHERE A.QUESTION_ID = ?")) {
+
+            ps.setLong(1, questionId);
+
+            //retrieve question
+            try (ResultSet r = ps.executeQuery()) {
+                while (r.next()) {
+                    q = new Question(r.getLong("id"), r.getInt("score"),
+                                                     r.getInt("level"), r.getString("text"));
+                }
+            }
+
+            //retrieve answers
+            ps2.setLong(1, questionId);
+            try (ResultSet r = ps2.executeQuery()) {
+                while (r.next()) {
+                    Answer answer = new Answer(r.getLong("id"), r.getString("text"),
+                                               r.getBoolean("is_correct"), r.getString("letter"));
+                    q.addAnswer(answer);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return q;
+    }
+
+    @Override
+    public Long save(Question question) {
         log.debug("Saving question [{}]", question);
+        Long questionId = null;
         try (Connection c = DriverManager.getConnection(url + database, userName, password);
              PreparedStatement ps = c.prepareStatement("INSERT INTO QUESTION(level, score, text) VALUES (?, ?, ?)",
                                                        Statement.RETURN_GENERATED_KEYS);
@@ -82,8 +117,10 @@ public class QuestionRepositoryImpl implements QuestionRepository {
             ps.executeUpdate();
 
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
-                if (generatedKeys.next())
-                    question.setId(generatedKeys.getLong(1));
+                if (generatedKeys.next()) {
+                    questionId = generatedKeys.getLong(1);
+                    question.setId(questionId);
+                }
             }
             //insert answers
             for (Answer a : question.getAnswers()) {
@@ -95,9 +132,9 @@ public class QuestionRepositoryImpl implements QuestionRepository {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
-        return true;
+        return questionId;
     }
 
     @Override
