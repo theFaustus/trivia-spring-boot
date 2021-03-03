@@ -123,6 +123,27 @@ public class QuestionRepositoryImpl implements QuestionRepository {
     }
 
     @Override
+    public boolean deleteById(Long questionId) {
+        try (Connection c = DriverManager.getConnection(url + database, userName, password);
+             PreparedStatement ps = c.prepareStatement("DELETE FROM ANSWER WHERE QUESTION_ID = ?");
+             PreparedStatement ps2 = c.prepareStatement("DELETE FROM QUESTION WHERE ID = ?")) {
+
+            //delete answers
+            ps.setLong(1, questionId);
+            ps.executeUpdate();
+
+            //delete question
+            ps2.setLong(1, questionId);
+            ps2.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public List<Question> findAll() {
         List<Question> questions = new ArrayList<>();
         try (Connection c = DriverManager.getConnection(url + database, userName, password);

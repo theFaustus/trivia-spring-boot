@@ -1,6 +1,7 @@
 package com.tekwill.java.fundamentals.triviaspringboot.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tekwill.java.fundamentals.triviaspringboot.domain.exceptions.EmptyQuestionTextException;
 import com.tekwill.java.fundamentals.triviaspringboot.domain.exceptions.InvalidLevelException;
 import com.tekwill.java.fundamentals.triviaspringboot.domain.exceptions.InvalidScoreException;
@@ -17,6 +18,9 @@ public class Question {
     private int score;
     private int level;
     private String text;
+
+    public Question() {
+    }
 
     public Question(Long id, List<Answer> answers, int score, int level, String text) {
         this(score, level, text, answers);

@@ -12,5 +12,7 @@ public interface QuestionService {
 
     boolean delete(Question question);
 
+    boolean deleteById(Long questionId);
+
     List<Question> getAll();
 }

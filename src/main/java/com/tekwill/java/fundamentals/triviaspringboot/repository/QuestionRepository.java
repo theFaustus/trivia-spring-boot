@@ -12,5 +12,7 @@ public interface QuestionRepository {
 
     boolean delete(Question question);
 
+    boolean deleteById(Long questionId);
+
     List<Question> findAll();
 }

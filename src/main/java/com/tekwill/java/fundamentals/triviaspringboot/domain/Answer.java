@@ -1,6 +1,7 @@
 package com.tekwill.java.fundamentals.triviaspringboot.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tekwill.java.fundamentals.triviaspringboot.domain.exceptions.EmptyAnswerTextException;
 import lombok.Data;
 
@@ -11,7 +12,11 @@ public class Answer {
     private boolean isCorrect;
     private String letter;
 
+    @JsonIgnore
     private Question question;
+
+    public Answer() {
+    }
 
     public Answer(Long id, String text, boolean isCorrect, String letter) {
         this(text, isCorrect, letter);
